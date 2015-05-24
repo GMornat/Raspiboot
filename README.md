@@ -22,5 +22,4 @@ Currently, I haven't recieve my Raspberry Pi. I used only the commands found on 
 As I already said, Raspiboot is a fork from this project. I can be found on [Hexxeh GitHub page](https://github.com/Hexxeh/rpi-update). 
 
 ###How do I install Raspbian for my Raspberry Pi?###
-Check out this video :) NOOBS is the best solution for begginers !
-<iframe src="https://player.vimeo.com/video/90518800?byline=0" width="400" height="300" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+[Check out this video](https://vimeo.com/90518800) :) NOOBS is the best solution for begginers !
