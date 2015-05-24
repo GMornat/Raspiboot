@@ -27,7 +27,7 @@ if [ $choix == "1" ]
 	elif [ $choix == "6" ]
 		then sudo apt-get install kodi
 	else
-		echo 'Error !' & begin
+		echo 'Error !' && begin
 fi
 }
 function firmware {
