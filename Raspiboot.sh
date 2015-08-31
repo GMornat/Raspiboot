@@ -12,6 +12,7 @@ echo '3- Overclock & System Settings'
 echo '4- System Info'
 echo '5- Install Synaptic'
 echo '6- Install Kodi on Raspbian'
+echo '7- Reboot system'
 choix="Notset"
 read choix
 if [ $choix == "1" ]
@@ -26,6 +27,8 @@ if [ $choix == "1" ]
 		then sudo apt-get install synaptic
 	elif [ $choix == "6" ]
 		then sudo apt-get install kodi
+	elif [ $choix == "7" ]
+		then sudo reboot
 	else
 		echo 'Error !' && begin
 fi
