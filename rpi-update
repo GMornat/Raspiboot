@@ -31,6 +31,7 @@ SKIP_BACKUP=${SKIP_BACKUP:-0}
 SKIP_DOWNLOAD=${SKIP_DOWNLOAD:-0}
 SKIP_WARNING=${SKIP_WARNING:-0}
 WANT_SYMVERS=${WANT_SYMVERS:-0}
+PRUNE_MODULES=${PRUNE_MODULES:-0}
 RPI_UPDATE_UNSUPPORTED=${RPI_UPDATE_UNSUPPORTED:-0}
 JUST_CHECK=${JUST_CHECK:-0}
 FW_REPO="${REPO_URI}.git"
@@ -77,6 +78,19 @@ function update_modules {
 			BASEDIR=$(basename "${DIR}")
 			rm -rf "${FW_MODPATH}/${BASEDIR}/kernel"
 		done
+
+		if [[ ${PRUNE_MODULES} -ne 0 ]]; then
+			find "${FW_MODPATH}" -mindepth 1 -maxdepth 1 -type d | while read DIR; do
+				COUNT=$(find ${DIR} -type f ! \( -name '*.ko' -o -name 'modules.*' \) | wc -l);
+				if [[ ${COUNT} -eq 0 ]]; then
+					echo "Pruning ${DIR}"
+					rm -rf ${DIR}
+				else
+					echo "Keeping ${DIR}"
+				fi
+			done
+		fi
+
 		cp -R "${FW_REPOLOCAL}/modules/"* "${FW_MODPATH}/"
 		find "${FW_REPOLOCAL}/modules" -mindepth 1 -maxdepth 1 -type d | while read DIR; do
 			BASEDIR=$(basename "${DIR}")
@@ -92,11 +106,12 @@ function update_vc_libs {
 	echo " *** Updating VideoCore libraries"
 
 	if [[ -e ${ROOT_PATH}/bin/sh ]]; then
-		ELFOUTPUT=$(readelf -a "${ROOT_PATH}/bin/sh")
+		ELFOUTPUT=$(readelf -a "${ROOT_PATH}/bin/sh"; readelf -h "${ROOT_PATH}/bin/sh")
 	else
 		ELFOUTPUT="VFP_args"
 	fi
-	if [[ "${ELFOUTPUT}" != "${ELFOUTPUT/VFP_args/}" ]]; then
+	if [[ "${ELFOUTPUT}" != "${ELFOUTPUT/VFP_args/}" || \
+			"${ELFOUTPUT}" != "${ELFOUTPUT/hard-float/}" ]]; then
 		echo " *** Using HardFP libraries"
 		cp -R "${FW_REPOLOCAL}/vc/hardfp/"* "${ROOT_PATH}/"
 	else
@@ -142,12 +157,12 @@ function update_firmware {
 	cp "${FW_REPOLOCAL}/"*.dat "${FW_PATH}/"
 	if [[ ${SKIP_KERNEL} -eq 0 ]]; then
 		cp "${FW_REPOLOCAL}/"*.img "${FW_PATH}/"
-		if [[ -n $(shopt -s nullglob; echo "${FW_REPOLOCAL}/"*.dtb) ]]; then
-			cp "${FW_REPOLOCAL}/"*.dtb "${FW_PATH}/"
+		if [[ -n $(shopt -s nullglob; echo "${FW_REPOLOCAL}/"*.dtb*) ]]; then
+			cp "${FW_REPOLOCAL}/"*.dtb* "${FW_PATH}/"
 		fi
-		if [[ -n $(shopt -s nullglob; echo "${FW_REPOLOCAL}/overlays/"*.dtb) ]]; then
+		if [[ -n $(shopt -s nullglob; echo "${FW_REPOLOCAL}/overlays/"*.dtb*) ]]; then
 			mkdir -p "${FW_PATH}/overlays"
-			cp "${FW_REPOLOCAL}/overlays/"*.dtb "${FW_PATH}/overlays/"
+			cp "${FW_REPOLOCAL}/overlays/"*.dtb* "${FW_PATH}/overlays/"
 			if [[ -f "${FW_REPOLOCAL}/overlays/README" ]]; then
 				cp "${FW_REPOLOCAL}/overlays/README" "${FW_PATH}/overlays/"
 			fi
